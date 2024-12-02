@@ -1,5 +1,6 @@
 import pygame as p
 import ChessEngine
+from movement import *
 
 width = height = 400
 dimension = 8
@@ -32,35 +33,17 @@ def main():
                 running = False
             if e.type == p.MOUSEBUTTONDOWN: #Piece pressed
                 current_pos = p.mouse.get_pos()
-                current_col_pos = int(current_pos[0]//sq_size)
-                current_row_pos = int(current_pos[1]//sq_size)
-                clicked_piece = gs.board[current_row_pos][current_col_pos]
-                if gs.whiteToMove == True: #White to move
-                    if clicked_piece not in whitepieces: #Selected piece is black
-                        clicked_piece = ""
-                else: #Black to move
-                    if clicked_piece not in blackpieces: #Selected piece is white
-                        clicked_piece = ""
+                current_coord = [int(current_pos[1]//sq_size), int(current_pos[0]//sq_size)]
+                clicked_piece = gs.board[current_coord[0]][current_coord[1]]
             if e.type == p.MOUSEBUTTONUP:
                 if clicked_piece != "":
-                    if gs.whiteToMove == True: #White move
-                        new_pos = p.mouse.get_pos()
-                        new_col_pos = int(new_pos[0]//sq_size)
-                        new_row_pos = int(new_pos[1]//sq_size)
-                        possible_row = movement_piece(gs,current_col_pos,current_row_pos,clicked_piece)
-                        if new_row_pos in possible_row:
-                            gs.board[current_row_pos][current_col_pos] = "--"
-                            gs.board[new_row_pos][new_col_pos] = clicked_piece
-                            gs.whiteToMove = False
-                    else: #Black move
-                        new_pos = p.mouse.get_pos() #werkt iets niet
-                        new_col_pos = int(new_pos[0] // sq_size)
-                        new_row_pos = int(new_pos[1] // sq_size)
-                        possible_row = movement_piece(gs, current_col_pos, current_row_pos, clicked_piece)
-                        if new_row_pos in possible_row:
-                            gs.board[current_row_pos][current_col_pos] = "--"
-                            gs.board[new_row_pos][new_col_pos] = clicked_piece
-                            gs.whiteToMove = True
+                    new_pos = p.mouse.get_pos()
+                    new_coord = [int(new_pos[1]//sq_size), int(new_pos[0]//sq_size)]
+                    possible_coord = movement_piece(gs,current_coord,clicked_piece)
+                    if new_coord in possible_coord:
+                        print("ok")
+                    else:
+                        print("false")
                 else:
                     continue
         clock.tick(max_fps)
@@ -88,15 +71,7 @@ def drawPieces(screen, board):
             if piece != "--": #not empty square
                 screen.blit(images[piece], p.Rect(col*sq_size, row*sq_size, sq_size, sq_size))
 
-def movement_piece(gs,current_col,current_row,clicked_piece):
-    possible_row = [0,1,2,3,4,5,6,7]
-    type_piece = clicked_piece[1]
-    if type_piece == "p":
-        if current_row == 6:
-            possible_row = [5,4]
-        else:
-            possible_row = [current_row-1]
-    return possible_row
+
 
 
 main()
