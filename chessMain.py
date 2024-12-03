@@ -13,33 +13,35 @@ blackpieces = ["bR","bN","bB","bQ","bK","bB","bN","bR","bp"]
 #Initialize global dict of images. This will be calles once in the main
 
 def loadImages():
-    pieces = ["bR","bN","bB","bQ","bK","bB","bN","bR","wR","wN","wB","wQ","wK","wB","wN","wR","wp","bp"]
+    pieces = ["bR1","bN1","bB1","bQ1","bK1","bB2","bN2","bR2","wR1","wN1","wB1","wQ1","wK1","wB2","wN2","wR2",
+              "wp1","wp2","wp3","wp4","wp5","wp6","wp7","wp8",
+              "bp1","bp2","bp3","bp4","bp5","bp6","bp7","bp8",]
     for piece in pieces:
-        images[piece] = p.transform.scale(p.image.load(f"images/{piece}.svg"),(sq_size,sq_size))
+        images[piece] = p.transform.scale(p.image.load(f"images/{piece[0:2]}.svg"),(sq_size,sq_size))
     #Note we can acces an image by saying 'images['wp']
 def start_position():
     white_pawns = ["wp1","wp2","wp3","wp4","wp5","wp6","wp7","wp8"]
     for index,p in enumerate(white_pawns):
-        start_pieces[p] = pawn("w",[6,index])
+        start_pieces[p] = pawn(p,"w",[6,index])
     black_pawns = ["bp1","bp2","bp3","bp4","bp5","bp6","bp7","bp8"]
     for index,p in enumerate(black_pawns):
-        start_pieces[p] = pawn("w",[1,index])
-    start_pieces["wR1"] = rook("w",[7,0])
-    start_pieces["bR1"] = rook("b",[0,0])
-    start_pieces["wR2"] = rook("w",[7,7])
-    start_pieces["bR2"] = rook("b",[0,7])
-    start_pieces["wB1"] = rook("w", [7, 2])
-    start_pieces["bB1"] = rook("b", [0, 2])
-    start_pieces["wB2"] = rook("w", [7, 5])
-    start_pieces["bB2"] = rook("b", [0, 5])
-    start_pieces["wN1"] = rook("w", [7, 1])
-    start_pieces["bN1"] = rook("b", [0, 1])
-    start_pieces["wN2"] = rook("w", [7, 6])
-    start_pieces["bN2"] = rook("b", [0, 6])
-    start_pieces["wQ1"] = rook("w", [7, 3])
-    start_pieces["bQ1"] = rook("b", [0, 3])
-    start_pieces["wK1"] = rook("w", [7, 4])
-    start_pieces["bK1"] = rook("b", [0, 4])
+        start_pieces[p] = pawn(p,"w",[1,index])
+    start_pieces["wR1"] = rook("wR1","w",[7,0])
+    start_pieces["bR1"] = rook("bR1","b",[0,0])
+    start_pieces["wR2"] = rook("wR2","w",[7,7])
+    start_pieces["bR2"] = rook("bR2","b",[0,7])
+    start_pieces["wB1"] = bishop("wB1","w", [7, 2])
+    start_pieces["bB1"] = bishop("bB1","b", [0, 2])
+    start_pieces["wB2"] = bishop("wB2","w", [7, 5])
+    start_pieces["bB2"] = bishop("bB2","b", [0, 5])
+    start_pieces["wN1"] = knight("wN1","w", [7, 1])
+    start_pieces["bN1"] = knight("bN1","b", [0, 1])
+    start_pieces["wN2"] = knight("wN2","w", [7, 6])
+    start_pieces["bN2"] = knight("bN2","b", [0, 6])
+    start_pieces["wQ1"] = queen("wQ1","w", [7, 3])
+    start_pieces["bQ1"] = queen("bQ1","b", [0, 3])
+    start_pieces["wK1"] = king("wK1","w", [7, 4])
+    start_pieces["bK1"] = king("bK1","b", [0, 4])
 
 
 #The main driver. This will handle user input and updating graphics
@@ -54,6 +56,7 @@ def main():
     running = True
     while running:
         for e in p.event.get():
+            board_update(gs)
             drawGameState(screen,gs) #Show current position
             if e.type == p.QUIT: #Possibility to quit
                 running = False
@@ -63,23 +66,16 @@ def main():
                 for name,item in start_pieces.items():
                     if item.position == current_coord:
                         clicked_piece = name
-                        print(clicked_piece)
-                        print(start_pieces[clicked_piece].position)
-                    # else:
-                    #     clicked_piece = ""
+                        possible_coords = movement_piece(gs,current_coord,clicked_piece)
             if e.type == p.MOUSEBUTTONUP:
-                # if clicked_piece != "":
                 new_pos = p.mouse.get_pos()
                 new_coord = [int(new_pos[1]//sq_size), int(new_pos[0]//sq_size)]
-                start_pieces[clicked_piece].position = new_coord
-                print(start_pieces[clicked_piece].position)
-                    # possible_coord = movement_piece(gs,current_coord,clicked_piece)
-                    # if new_coord in possible_coord:
-                    #     print("ok")
-                    # else:
-                    #     print("false")
-                # else:
-                #     continue
+                if new_coord in possible_coords:
+                    start_pieces[clicked_piece].position = new_coord
+                else:
+                    continue
+
+
         clock.tick(max_fps)
         p.display.flip()
 
@@ -104,6 +100,14 @@ def drawPieces(screen, board):
             piece = board[row][col]
             if piece != "--": #not empty square
                 screen.blit(images[piece], p.Rect(col*sq_size, row*sq_size, sq_size, sq_size))
-
+def board_update(gs):
+    for c in range(8):
+        for r in range(8):
+            if [[r],[c]] not in start_pieces.values():
+                gs.board[r][c] = "--"
+            for test in start_pieces.values():
+                if test.position[0] == r and test.position[1] == c:
+                    gs.board[r][c] = test.name
+    return gs
 
 main()
