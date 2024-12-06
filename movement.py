@@ -1,12 +1,12 @@
 from ChessEngine import *
-from chessMain import start_pieces
 
-def movement_piece(gs,current_coord,clicked_piece):
+
+def movement_piece(start_pieces, gs,current_coord,clicked_piece):
     possible_coord = []
     current_row = current_coord[0]
     current_col = current_coord[1]
     type_piece = clicked_piece[1]
-    dummy_coord = []
+    dummy_coord = [] #Checks for everything inside the board
     if type_piece == "p":
         if clicked_piece[0:2] == "wp":
             if current_coord[0] == 6:
@@ -60,13 +60,19 @@ def movement_piece(gs,current_coord,clicked_piece):
 
 
     for index, item in enumerate(possible_coord):
-        if item != current_coord and (0 <= item[0] < 8) and (0 <= item[1] < 8):
-            for k,v in start_pieces.items():
-                if item in v.position:
-                    if v.color == clicked_piece.color:
-                        continue
-                    else:
-                        dummy_coord.append(item)
+        if item != current_coord and (0 <= item[0] < 8) and (0 <= item[1] < 8): #Coords elimineren die buiten bord liggen
+            dummy_coord.append(item)
+    for v in start_pieces.values():
+        for item in dummy_coord:
+            if v.position == item:
+                if clicked_piece[1] == "p": #Uitzondering schuin slaan voor pion, kan niet rechtdoor slaan
+                    dummy_coord.remove(item)
+                elif v.color == start_pieces[clicked_piece].color: #Coords removen waar een stuk van uw kleur op staat
+                    dummy_coord.remove(item)
+            else:
+                continue
+
     possible_coord = dummy_coord[:]
+    print(possible_coord)
     return possible_coord
 

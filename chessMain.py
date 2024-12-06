@@ -25,7 +25,7 @@ def start_position():
         start_pieces[p] = pawn(p,"w",[6,index])
     black_pawns = ["bp1","bp2","bp3","bp4","bp5","bp6","bp7","bp8"]
     for index,p in enumerate(black_pawns):
-        start_pieces[p] = pawn(p,"w",[1,index])
+        start_pieces[p] = pawn(p,"b",[1,index])
     start_pieces["wR1"] = rook("wR1","w",[7,0])
     start_pieces["bR1"] = rook("bR1","b",[0,0])
     start_pieces["wR2"] = rook("wR2","w",[7,7])
@@ -66,11 +66,15 @@ def main():
                 for name,item in start_pieces.items():
                     if item.position == current_coord:
                         clicked_piece = name
-                        possible_coords = movement_piece(gs,current_coord,clicked_piece)
+                        possible_coords = movement_piece(start_pieces,gs,current_coord,clicked_piece)
             if e.type == p.MOUSEBUTTONUP:
                 new_pos = p.mouse.get_pos()
                 new_coord = [int(new_pos[1]//sq_size), int(new_pos[0]//sq_size)]
                 if new_coord in possible_coords:
+                    for k,v in start_pieces.items():
+                        if v.position == new_coord:
+                            del start_pieces[k]
+                            break
                     start_pieces[clicked_piece].position = new_coord
                 else:
                     continue
